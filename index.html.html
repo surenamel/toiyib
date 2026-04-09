@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>🌿 Toiyibun Codex v2 — Smart Palm OER System</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --g1:#0B1F12;--g2:#132B1A;--g3:#1E4228;--lime:#52B788;--lime2:#74C69D;
+  --gold:#F4A261;--gold2:#E76F51;--white:#F0FFF4;--text:#1B3A22;
+  --red:#E63946;--blue:#219EBC;--purple:#7B2FBE;--silver:#B8C0CC;
+  --shadow:0 4px 20px #0005;
+}
+body{font-family:'Sarabun',sans-serif;background:var(--g1);color:var(--white);min-height:100vh;overflow-x:hidden}
+
+/* ── NAV ── */
+.navbar{
+  position:sticky;top:0;z-index:200;background:#0B1F12EE;backdrop-filter:blur(12px);
+  border-bottom:2px solid var(--lime);padding:10px 16px;
+  display:flex;align-items:center;gap:10px;
+}
+.logo-mark{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--lime),var(--gold));display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.logo-text{font-size:17px;font-weight:800;color:var(--lime)}
+.logo-sub{font-size:10px;color:#6B9E7A}
+.nav-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--lime);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── TAB BAR ── */
+.tab-bar{
+  display:flex;background:var(--g2);border-bottom:1px solid var(--g3);
+  overflow-x:auto;scrollbar-width:none;
+}
+.tab-bar::-webkit-scrollbar{display:none}
+.tab-item{
+  flex-shrink:0;padding:10px 14px;font-family:'Sarabun',sans-serif;
+  font-size:12px;font-weight:700;color:#6B9E7A;border:none;background:none;
+  cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;
+  transition:all .2s;
+}
+.tab-item.active{color:var(--lime);border-bottom-color:var(--lime)}
+
+/* ── SCREENS ── */
+.screen{display:none;padding:14px;min-height:calc(100vh - 120px)}
+.screen.active{display:block;animation:fadeUp .3s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── CARDS ── */
+.card{background:var(--g2);border:1px solid var(--g3);border-radius:16px;padding:16px;margin-bottom:14px}
+.card-hdr{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.card-hdr h3{font-size:15px;font-weight:700;flex:1}
+.card-hdr .icon{font-size:22px}
+
+/* ── BIG BUTTONS ── */
+.btn{
+  display:block;width:100%;padding:16px;border-radius:14px;border:none;cursor:pointer;
+  font-family:'Sarabun',sans-serif;font-size:16px;font-weight:700;
+  margin-bottom:10px;transition:transform .15s,opacity .2s;text-align:center;text-decoration:none;
+}
+.btn:active{transform:scale(.97)}
+.btn-lime{background:linear-gradient(135deg,var(--lime),var(--lime2));color:var(--g1)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:white}
+.btn-outline{background:transparent;border:2px solid var(--lime);color:var(--lime)}
+.btn-sm{padding:10px 16px;font-size:13px;border-radius:10px;display:inline-block;width:auto;margin:4px}
+
+/* ── FORM ── */
+.field{margin-bottom:14px}
+.label{font-size:13px;font-weight:700;color:var(--lime2);margin-bottom:5px;display:block}
+.hint{font-size:11px;color:#6B9E7A;margin-top:3px}
+.input{
+  width:100%;padding:13px 14px;border-radius:12px;border:2px solid var(--g3);
+  background:var(--g1);color:var(--white);font-family:'Sarabun',sans-serif;font-size:15px;outline:none;
+  transition:border-color .2s;
+}
+.input:focus{border-color:var(--lime)}
+.select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M6 8 0 0h12z' fill='%2352B788'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+
+/* ── SLIDER ── */
+.slider-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.slider-val{font-size:20px;font-weight:800;color:var(--lime)}
+input[type=range]{width:100%;height:6px;-webkit-appearance:none;background:var(--g3);border-radius:3px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:var(--lime);cursor:pointer}
+
+/* ── OER METER ── */
+.oer-ring{position:relative;width:140px;height:140px;margin:0 auto 16px}
+.oer-ring svg{transform:rotate(-90deg)}
+.oer-ring .ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.oer-num{font-size:28px;font-weight:800}
+.bar-track{height:12px;border-radius:6px;background:var(--g3);overflow:hidden;margin:6px 0}
+.bar-fill{height:100%;border-radius:6px;transition:width 1s ease}
+
+/* ── STATS ROW ── */
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.stat-box{background:var(--g1);border:1px solid var(--g3);border-radius:12px;padding:12px;text-align:center}
+.stat-val{font-size:20px;font-weight:800;color:var(--lime)}
+.stat-label{font-size:10px;color:#6B9E7A;margin-top:2px}
+
+/* ── T-POINTS ── */
+.tpoints-hero{
+  background:linear-gradient(135deg,#1E2D0A,#0B3D1A);
+  border:2px solid var(--gold);border-radius:20px;padding:20px;text-align:center;margin-bottom:14px;
+}
+.tpoints-num{font-size:56px;font-weight:800;color:var(--gold);line-height:1}
+.tier-bar{display:flex;gap:4px;margin:12px 0}
+.tier-seg{flex:1;height:8px;border-radius:4px;transition:background .5s}
+.tier-label{display:flex;justify-content:space-between;font-size:10px;color:#6B9E7A}
+
+/* ── TIER CARDS ── */
+.tier-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.tier-card{border-radius:12px;padding:12px;text-align:center;border:2px solid}
+.tier-silver{background:#1E2230;border-color:var(--silver);color:var(--silver)}
+.tier-gold{background:#2D1E00;border-color:var(--gold);color:var(--gold)}
+.tier-diamond{background:#1A0A2E;border-color:var(--purple);color:var(--purple)}
+.tier-icon{font-size:28px;margin-bottom:4px}
+.tier-name{font-size:13px;font-weight:700}
+.tier-req{font-size:10px;opacity:.7;margin-top:2px}
+
+/* ── EARN TABLE ── */
+.earn-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--g3)}
+.earn-row:last-child{border:none}
+.earn-icon{font-size:22px;flex-shrink:0}
+.earn-info{flex:1}
+.earn-title{font-size:13px;font-weight:700}
+.earn-desc{font-size:11px;color:#6B9E7A;margin-top:2px}
+.earn-pts{font-size:16px;font-weight:800;color:var(--gold);flex-shrink:0}
+
+/* ── PITCH CARDS ── */
+.pitch-card{
+  border-radius:16px;padding:16px;margin-bottom:12px;border:2px solid;cursor:pointer;
+  transition:transform .15s,box-shadow .15s;
+}
+.pitch-card:active{transform:scale(.98)}
+.pitch-pocket{background:linear-gradient(135deg,#0B3D1A,#132B1A);border-color:var(--lime)}
+.pitch-ease{background:linear-gradient(135deg,#0A2540,#132B1A);border-color:var(--blue)}
+.pitch-visionary{background:linear-gradient(135deg,#2D1E00,#132B1A);border-color:var(--gold)}
+.pitch-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;margin-bottom:8px}
+.pitch-title{font-size:17px;font-weight:800;margin-bottom:6px}
+.pitch-when{font-size:12px;color:#6B9E7A;margin-bottom:8px}
+.pitch-body{font-size:13px;line-height:1.7;display:none}
+.pitch-body.open{display:block;animation:fadeUp .3s}
+.pitch-toggle{font-size:11px;color:var(--lime);font-weight:700;margin-top:8px}
+
+/* ── RISK TABLE ── */
+.risk-item{background:var(--g1);border-radius:12px;padding:12px;margin-bottom:8px;border-left:4px solid}
+.risk-title{font-size:13px;font-weight:700;margin-bottom:4px}
+.risk-impact{font-size:11px;color:#FF8A8A;margin-bottom:4px}
+.risk-fix{font-size:11px;color:var(--lime2)}
+
+/* ── ALERTS ── */
+.alert{padding:11px 14px;border-radius:10px;margin-bottom:10px;font-size:13px;line-height:1.6;border:1px solid;display:flex;gap:8px;align-items:flex-start}
+.alert-tip{background:#0D3018;border-color:var(--lime);color:#A8D5A2}
+.alert-warn{background:#3D2000;border-color:var(--gold);color:#FFD166}
+.alert-info{background:#071E2E;border-color:var(--blue);color:#90CAF9}
+
+/* ── RIPENESS ── */
+.ripe-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ripe-card{border-radius:14px;padding:14px;text-align:center;border:2px solid;cursor:pointer;transition:transform .15s}
+.ripe-card:active{transform:scale(.96)}
+.ripe-emoji{font-size:38px;margin-bottom:4px}
+.ripe-name{font-size:14px;font-weight:800;margin-bottom:3px}
+.ripe-detail{font-size:11px;opacity:.75}
+.r-unripe{background:#2D0000;border-color:var(--red);color:#FF9999}
+.r-under{background:#2D1500;border-color:var(--gold);color:#FFD166}
+.r-ripe{background:#0D3018;border-color:var(--lime);color:#A8D5A2}
+.r-over{background:#1A0033;border-color:var(--purple);color:#CE93D8}
+
+/* ── ROI ── */
+.roi-box{background:linear-gradient(135deg,#0D3018,#132B1A);border:2px solid var(--lime);border-radius:16px;padding:16px;text-align:center;margin-bottom:14px}
+.roi-big{font-size:48px;font-weight:800;color:var(--gold)}
+.roi-label{font-size:13px;color:#6B9E7A}
+.compare-row{display:flex;gap:8px;margin-bottom:8px}
+.compare-cell{flex:1;background:var(--g1);border-radius:10px;padding:12px;text-align:center;border:1px solid var(--g3)}
+.compare-val{font-size:18px;font-weight:800}
+.compare-label{font-size:10px;color:#6B9E7A;margin-top:2px}
+
+/* ── SENSOR GRID ── */
+.sensor-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sensor-item{background:var(--g1);border:1px solid var(--g3);border-radius:10px;padding:10px;text-align:center}
+.sensor-val{font-size:20px;font-weight:800}
+.sensor-label{font-size:10px;color:#6B9E7A;margin-top:2px}
+.sensor-unit{font-size:10px;color:#A8D5A2}
+
+/* ── BLOCKCHAIN LOG ── */
+.log-item{display:flex;gap:8px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--g3);font-size:12px}
+.log-item:last-child{border:none}
+.log-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.log-hash{font-family:monospace;font-size:9px;color:#6B9E7A}
+.log-pts{font-weight:800;color:var(--gold);margin-left:auto;flex-shrink:0}
+
+/* ── KPI ROW ── */
+.kpi-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.kpi-box{background:var(--g1);border-radius:12px;padding:12px;text-align:center;border:1px solid}
+.kpi-val{font-size:18px;font-weight:800}
+.kpi-label{font-size:9px;color:#6B9E7A;margin-top:2px}
+.kpi-target{font-size:9px;margin-top:2px;font-weight:700}
+
+/* ── FOOTER ── */
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;background:var(--g2);border-top:1px solid var(--g3);
+  display:flex;justify-content:space-around;padding:8px 0 calc(8px + env(safe-area-inset-bottom));z-index:100;
+}
+.bnav-item{flex:1;text-align:center;cursor:pointer;padding:4px;color:#6B9E7A;font-size:10px;font-weight:700}
+.bnav-item.active{color:var(--lime)}
+.bnav-icon{font-size:22px;display:block;margin-bottom:2px}
+.pb{padding-bottom:70px}
+
+/* ── TAG ── */
+.tag{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700}
+.tag-green{background:#1B4332;color:var(--lime);border:1px solid var(--lime)}
+.tag-gold{background:#3D2000;color:var(--gold);border:1px solid var(--gold)}
+.tag-red{background:#3D0000;color:#FF8A8A;border:1px solid var(--red)}
+.tag-blue{background:#071E2E;color:#90CAF9;border:1px solid var(--blue)}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <div class="logo-mark">🌿</div>
+  <div>
+    <div class="logo-text">Toiyibun Codex</div>
+    <div class="logo-sub">Smart Palm OER + Carbon System v2.0</div>
+  </div>
+  <div class="nav-right">
+    <div class="live-dot"></div>
+    <span style="font-size:11px;color:#6B9E7A" id="clock">--:--</span>
+  </div>
+</div>
+
+<!-- TAB BAR -->
+<div class="tab-bar">
+  <button class="tab-item active" onclick="showTab('home')">🏠 หน้าหลัก</button>
+  <button class="tab-item" onclick="showTab('oer')">📈 OER Analyzer</button>
+  <button class="tab-item" onclick="showTab('tpoints')">🪙 T-Points</button>
+  <button class="tab-item" onclick="showTab('ripe')">🌴 ตรวจทะลาย</button>
+  <button class="tab-item" onclick="showTab('roi')">💰 ROI</button>
+  <button class="tab-item" onclick="showTab('pitch')">📢 Pitch Scripts</button>
+  <button class="tab-item" onclick="showTab('risk')">⚠️ Risk</button>
+  <button class="tab-item" onclick="showTab('blockchain')">⛓ Blockchain</button>
+</div>
+
+<!-- ══ HOME ══ -->
+<div id="tab-home" class="screen active pb">
+  <div class="stat-row">
+    <div class="stat-box"><div class="stat-val" id="h-oer">16.5%</div><div class="stat-label">OER ปัจจุบัน</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:var(--gold)" id="h-pts">0</div><div class="stat-label">T-Points</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:var(--blue)" id="h-tokens">0</div><div class="stat-label">kgCO₂ Token</div></div>
+  </div>
+  <div class="alert alert-tip">
+    <span>🌿</span>
+    <div><strong>ยินดีต้อนรับสู่ Toiyibun Codex v2!</strong><br>ระบบวิเคราะห์ OER อัจฉริยะ รองรับ Sensor ดิจิทัล + T-Points Blockchain + Carbon Credit</div>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><span class="icon">🎯</span><h3>ทำอะไรวันนี้?</h3></div>
+    <button class="btn btn-lime" onclick="showTab('oer')">📈 วิเคราะห์ OER สวนของฉัน</button>
+    <button class="btn btn-gold" onclick="showTab('tpoints')">🪙 ดู T-Points สะสม</button>
+    <button class="btn btn-outline" onclick="showTab('ripe')">🌴 ตรวจความสุกทะลาย</button>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><span class="icon">⚡</span><h3>Sensor Live — Yala Sandbox</h3></div>
+    <div class="sensor-grid" id="sensorGrid">
+      <!-- filled by JS -->
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><span class="icon">📋</span><h3>ข้อมูลสวนล่าสุด</h3></div>
+    <div id="lastFarm" style="color:#6B9E7A;font-size:13px">ยังไม่มีข้อมูล — ไปที่ OER Analyzer เพื่อเริ่มต้น</div>
+  </div>
+</div>
+
+<!-- ══ OER ANALYZER ══ -->
+<div id="tab-oer" class="screen pb">
+  <div class="card">
+    <div class="card-hdr"><span class="icon">📐</span><h3>ข้อมูลสวน</h3></div>
+    <div class="field">
+      <label class="label">ชื่อเจ้าของสวน</label>
+      <input class="input" id="o-name" type="text" placeholder="เช่น นายสมชาย ใจดี">
+    </div>
+    <div class="field">
+      <label class="label">พื้นที่ (ไร่)</label>
+      <input class="input" id="o-rai" type="number" placeholder="20" inputmode="decimal">
+    </div>
+    <div class="field">
+      <label class="label">อายุต้นปาล์ม (ปี)</label>
+      <div class="slider-row">
+        <span style="font-size:13px;color:#6B9E7A">อายุ</span>
+        <div class="slider-val" id="sv-age">12 ปี</div>
+      </div>
+      <input type="range" min="1" max="30" value="12" oninput="sv('age',this.value,' ปี');calcOER()">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hdr"><span class="icon">💧</span><h3>ระบบน้ำและปัจจัยสวน</h3></div>
+    <div class="field">
+      <label class="label">ระบบน้ำ → ผลต่อ OER</label>
+      <select class="input select" id="o-water" onchange="calcOER()">
+        <option value="0">🌧 น้ำฝนอย่างเดียว (+0%)</option>
+        <option value="1">🚿 มินิสปริงเกลอร์ (+1.5%)</option>
+        <option value="2">💧 น้ำหยด Drip (+2.5%)</option>
+        <option value="3">♻️ POME Recycling (+1.0%)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label class="label">ระบบปุ๋ย → ผลต่อ OER</label>
+      <select class="input select" id="o-fert" onchange="calcOER()">
+        <option value="0">📦 ปุ๋ยทั่วไป ไม่วิเคราะห์ดิน (+0%)</option>
+        <option value="1">🧪 วิเคราะห์ดินก่อนใส่ปุ๋ย (+1.0%)</option>
+        <option value="2">🤖 Precision Fertilizer AI (+2.0%)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label class="label">ระบบตัดเก็บเกี่ยว → ผลต่อ OER</label>
+      <select class="input select" id="o-harvest" onchange="calcOER()">
+        <option value="0">✂️ ตัดแบบดั้งเดิม ไม่มีระบบ (+0%)</option>
+        <option value="1">📱 ใช้ App แจ้งเตือนรอบตัด (+0.8%)</option>
+        <option value="2">🏆 Smart Harvesting + Digital Lot (+1.8%)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label class="label">IoT Sensor ดิน + อากาศ → ผลต่อ OER</label>
+      <select class="input select" id="o-iot" onchange="calcOER()">
+        <option value="0">❌ ไม่มี Sensor (+0%)</option>
+        <option value="1">📡 Soil Sensor 4 จุด (+0.7%)</option>
+        <option value="2">🛸 Full IoT + Weather Station (+1.2%)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label class="label">พันธุ์ปาล์ม → ผลต่อ OER</label>
+      <select class="input select" id="o-variety" onchange="calcOER()">
+        <option value="0">🌴 พันธุ์เก่า (OER ฐาน 16%)</option>
+        <option value="1">🌱 พันธุ์ใหม่ DxP (OER ฐาน 18%)</option>
+        <option value="2">💎 พันธุ์ High-OER สปีชีส์ใหม่ (OER ฐาน 20%)</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- OER RESULT -->
+  <div class="card" id="oerResult">
+    <div class="card-hdr"><span class="icon">☁️</span><h3>ผล OER ที่คาดการณ์</h3></div>
+    <div class="oer-ring">
+      <svg width="140" height="140" viewBox="0 0 140 140">
+        <circle cx="70" cy="70" r="58" fill="none" stroke="#1E4228" stroke-width="14"/>
+        <circle cx="70" cy="70" r="58" fill="none" stroke="url(#og)" stroke-width="14"
+          stroke-linecap="round" stroke-dasharray="364" id="oerArc" stroke-dashoffset="364"/>
+        <defs>
+          <linearGradient id="og" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#52B788"/>
+            <stop offset="100%" stop-color="#F4A261"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <div class="ring-center">
+        <div class="oer-num" id="oerPct" style="color:var(--lime)">16.0%</div>
+        <div style="font-size:10px;color:#6B9E7A">OER</div>
+      </div>
+    </div>
+    <div id="oerBars"></div>
+    <div id="oerSummary" style="font-size:13px;line-height:1.9;margin-top:10px"></div>
+    <button class="btn btn-lime" style="margin-top:12px" onclick="saveOER()">✅ บันทึกและรับ T-Points</button>
+  </div>
+</div>
+
+<!-- ══ T-POINTS ══ -->
+<div id="tab-tpoints" class="screen pb">
+  <div class="tpoints-hero">
+    <div style="font-size:13px;color:#A8D5A2;margin-bottom:4px">🪙 Toiyibun Points (T-Points) สะสม</div>
+    <div class="tpoints-num" id="tp-num">0</div>
+    <div style="font-size:13px;color:var(--gold);margin-top:4px" id="tp-tier">🌱 Silver Member</div>
+    <div class="tier-bar" id="tierBar" style="margin-top:12px">
+      <div class="tier-seg" style="background:var(--silver)" id="ts1"></div>
+      <div class="tier-seg" style="background:var(--g3)" id="ts2"></div>
+      <div class="tier-seg" style="background:var(--g3)" id="ts3"></div>
+      <div class="tier-seg" style="background:var(--g3)" id="ts4"></div>
+      <div class="tier-seg" style="background:var(--g3)" id="ts5"></div>
+    </div>
+    <div class="tier-label"><span>0</span><span id="tp-next">Gold: 500 แต้ม</span></div>
+  </div>
+
+  <div class="tier-grid">
+    <div class="tier-card tier-silver">
+      <div class="tier-icon">🌱</div>
+      <div class="tier-name">Silver</div>
+      <div class="tier-req">เริ่มต้น<br>0–499 แต้ม</div>
+    </div>
+    <div class="tier-card tier-gold">
+      <div class="tier-icon">🌳</div>
+      <div class="tier-name">Gold</div>
+      <div class="tier-req">OER > 18%<br>500–1,999 แต้ม</div>
+    </div>
+    <div class="tier-card tier-diamond">
+      <div class="tier-icon">💎</div>
+      <div class="tier-name">Diamond</div>
+      <div class="tier-req">OER > 20%<br>2,000+ แต้ม</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hdr"><span class="icon">⭐</span><h3>วิธีสะสมแต้ม</h3></div>
+    <div class="earn-row">
+      <div class="earn-icon">✅</div>
+      <div class="earn-info">
+        <div class="earn-title">ตัดปาล์มสุก 100% (Premium Cut)</div>
+        <div class="earn-desc">ตัดเมื่อผลร่วง ≥ 5 เมล็ด OER ≥ 18%</div>
+      </div>
+      <div class="earn-pts">+50</div>
+    </div>
+    <div class="earn-row">
+      <div class="earn-icon">📱</div>
+      <div class="earn-info">
+        <div class="earn-title">บันทึกข้อมูลผ่านแอปทันที (Real-time)</div>
+        <div class="earn-desc">บันทึกทุก lot ภายใน 1 ชั่วโมง</div>
+      </div>
+      <div class="earn-pts">+20</div>
+    </div>
+    <div class="earn-row">
+      <div class="earn-icon">📸</div>
+      <div class="earn-info">
+        <div class="earn-title">ถ่ายรูปยืนยันหน้าลานเท (Photo Proof)</div>
+        <div class="earn-desc">AI ตรวจสอบความสุกและป้องกันโกง</div>
+      </div>
+      <div class="earn-pts">+10</div>
+    </div>
+    <div class="earn-row">
+      <div class="earn-icon">⏰</div>
+      <div class="earn-info">
+        <div class="earn-title">รักษารอบตัดตามแจ้งเตือน (On-time)</div>
+        <div class="earn-desc">ตัดภายในหน้าต่าง 10–14 วัน</div>
+      </div>
+      <div class="earn-pts">+30</div>
+    </div>
+    <div class="earn-row">
+      <div class="earn-icon">📈</div>
+      <div class="earn-info">
+        <div class="earn-title">OER เฉลี่ยเกิน 20% ต่อเดือน</div>
+        <div class="earn-desc">โบนัสพิเศษสำหรับผู้ทำดีสม่ำเสมอ</div>
+      </div>
+      <div class="earn-pts">+100</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hdr"><span class="icon">🎁</span><h3>แลกของรางวัล (Privileges Market)</h3></div>
+    <div class="alert alert-info"><span>ℹ️</span><div>T-Points ไม่ใช่เงินสด — ใช้แลกส่วนลดสินค้าเกษตร สิทธิพิเศษสหกรณ์ และส่วนแบ่ง Carbon Credit</div></div>
+    <div id="rewardList">
+      <!-- filled by JS -->
+    </div>
+    <div style="text-align:center;margin-top:10px">
+      <button class="btn btn-sm btn-gold" onclick="earnPoints(50,'ตัดปาล์มสุก Premium Cut')">+50 จำลองตัดปาล์มสุก</button>
+      <button class="btn btn-sm btn-outline" onclick="earnPoints(30,'รักษารอบตัด On-time')">+30 จำลองตัดตามรอบ</button>
+      <button class="btn btn-sm btn-outline" onclick="earnPoints(20,'บันทึก Real-time')">+20 จำลองบันทึกข้อมูล</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hdr"><span class="icon">📋</span><h3>ประวัติแต้ม</h3></div>
+    <div id="ptLog" style="max-height:220px;overflow-y:auto"></div>
+  </div>
+</div>
+
+<!-- ══ RIPENESS ══ -->
+<div id="tab-ripe" class="screen pb">
+  <div class="alert alert-tip"><span>💡</span><div><strong>วิธีใช้:</strong> แตะบัตรที่ตรงกับสภาพทะลายที่เห็นจริงในสวน</div></div>
+  <div class="ripe-grid" style="margin-bottom:14px">
+    <div class="ripe-card r-unripe" onclick="showRipe('unripe')">
+      <div class="ripe-emoji">🟢</div>
+      <div class="ripe-name">ดิบ</div>
+      <div class="ripe-detail">สีเขียว-ดำ<br>ไม่มีผลร่วง</div>
+    </div>
+    <div class="ripe-card r-under" onclick="showRipe('under')">
+      <div class="ripe-emoji">🟠</div>
+      <div class="ripe-name">ยังไม่พอ</div>
+      <div class="ripe-detail">ส้ม-แดงปนม่วง<br>ผลร่วง < 5 เมล็ด</div>
+    </div>
+    <div class="ripe-card r-ripe" onclick="showRipe('ripe')">
+      <div class="ripe-emoji">🔴</div>
+      <div class="ripe-name">สุกพอดี ✅</div>
+      <div class="ripe-detail">ส้ม-แดงสด<br>ผลร่วง 5–50 เมล็ด</div>
+    </div>
+    <div class="ripe-card r-over" onclick="showRipe('over')">
+      <div class="ripe-emoji">⚫</div>
+      <div class="ripe-name">สุกเกิน</div>
+      <div class="ripe-detail">แดงเข้ม-ดำ<br>ผลร่วง > 50 เมล็ด</div>
+    </div>
+  </div>
+  <div id="ripeResult" style="display:none">
+    <div class="card" id="ripeCard">
+      <div id="ripeContent"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><span class="icon">📏</span><h3>กฎ 3 ข้อ — จำให้ขึ้นใจ</h3></div>
+    <div class="earn-row"><div class="earn-icon">👣</div><div class="earn-info"><div class="earn-title">นับ 5 เมล็ดก่อนตัด</div><div class="earn-desc">ผลร่วงใต้ต้นครบ 5 = ตัดได้ทันที</div></div></div>
+    <div class="earn-row"><div class="earn-icon">📏</div><div class="earn-info"><div class="earn-title">ก้านสั้น < 5 ซม.</div><div class="earn-desc">สั้นกว่า 2 นิ้วมือ ไม่อย่างนั้นโรงสกัดหัก</div></div></div>
+    <div class="earn-row"><div class="earn-icon">🚛</div><div class="earn-info"><div class="earn-title">ส่งภายใน 24 ชั่วโมง</div><div class="earn-desc">FFA เพิ่มทุกชั่วโมง รอช้า = ราคาตก</div></div></div>
+  </div>
+</div>
+
+<!-- ══ ROI ══ -->
+<div id="tab-roi" class="screen pb">
+  <div class="card">
+    <div class="card-hdr"><span class="icon">🏡</span><h3>กำหนดขนาดสวน</h3></div>
+    <div class="field">
+      <label class="label">พื้นที่สวน (ไร่)</label>
+      <div class="slider-row"><span style="font-size:13px;color:#6B9E7A">พื้นที่</span><div class="slider-val" id="sv-roi-rai">20 ไร่</div></div>
+      <input type="range" min="5" max="500" value="20" oninput="sv('roi-rai',this.value,' ไร่');calcROI()">
+    </div>
+    <div class="field">
+      <label class="label">OER ปัจจุบัน (%)</label>
+      <div class="slider-row"><span style="font-size:13px;color:#6B9E7A">OER เก่า</span><div class="slider-val" id="sv-roi-oer">16 %</div></div>
+      <input type="range" min="12" max="20" value="16" step="0.5" oninput="sv('roi-oer',this.value,' %');calcROI()">
+    </div>
+    <div class="field">
+      <label class="label">OER เป้าหมาย หลังใช้ระบบ (%)</label>
+      <div class="slider-row"><span style="font-size:13px;color:#6B9E7A">OER ใหม่</span><div class="slider-val" id="sv-roi-oer2">20 %</div></div>
+      <input type="range" min="14" max="25" value="20" step="0.5" oninput="sv('roi-oer2',this.value,' %');calcROI()">
+    </div>
+    <div class="field">
+      <label class="label">ราคากลางปาล์ม (บาท/กก.)</label>
+      <div class="slider-row"><span style="font-size:13px;color:#6B9E7A">ราคา</span><div class="slider-val" id="sv-roi-price">5 ฿</div></div>
+      <input type="range" min="3" max="10" value="5" step="0.25" oninput="sv('roi-price',this.value,' ฿');calcROI()">
+    </div>
+  </div>
+  <div id="roiResult">
+    <!-- filled by JS -->
+  </div>
+</div>
+
+<!-- ══ PITCH SCRIPTS ══ -->
+<div id="tab-pitch" class="screen pb">
+  <div class="alert alert-tip"><span>💡</span><div>แตะบัตรเพื่อดู Script เต็ม เลือกให้ตรงกับผู้ฟัง</div></div>
+
+  <div class="pitch-card pitch-pocket" onclick="togglePitch('p1')">
+    <div class="pitch-badge" style="background:#1B4332;color:var(--lime);border:1px solid var(--lime)">💰 Pocket Pitch</div>
+    <div class="pitch-title">เน้นรายได้ที่เพิ่มขึ้น</div>
+    <div class="pitch-when">ใช้กับ: เกษตรกรที่กังวลเรื่องราคาปาล์มตกต่ำ</div>
+    <div class="pitch-toggle" id="p1-toggle">▼ ดู Script เต็ม</div>
+    <div class="pitch-body" id="p1-body">
+      <p style="font-size:13px;line-height:1.8;color:#A8D5A2;font-style:italic">"สวัสดีครับน้า/อา… วันนี้ผมมีวิธีที่จะทำให้ปาล์มแปลงเดิมของน้าขายได้ราคาดีกว่าเดิมมาฝากครับ ปกติเราลุ้นแค่ราคากลางใช่ไหมครับ?</p>
+      <p style="font-size:13px;line-height:1.8;color:#A8D5A2;font-style:italic;margin-top:8px">แต่ระบบ Toiyibun Codex ที่ผมทำอยู่ จะเข้ามาช่วยดึง 'เปอร์เซ็นต์น้ำมัน' หรือค่า OER ในสวนน้าให้สูงขึ้นเหมือนของมาเลเซียเลยครับ จากเดิมเราได้ 16% ถ้าขยับไป 18–20% ได้ น้าจะได้เงินเพิ่มขึ้นกิโลละหลายสิบสตางค์ถึงบาทนึงเลยนะ</p>
+      <p style="font-size:13px;line-height:1.8;color:#A8D5A2;font-style:italic;margin-top:8px">แถมข้อมูลที่บันทึกไว้เนี่ย เราเอาไปเปลี่ยนเป็น 'ค่าคาร์บอน' ได้เงินโบนัสพิเศษเพิ่มอีกต่อหนึ่งด้วย น้าแค่ทำสวนให้ดีเหมือนเดิม เพิ่มเติมคือจิ้มมือถือนิดเดียว เดี๋ยวผมสอนให้ครับ"</p>
+    </div>
+  </div>
+
+  <div class="pitch-card pitch-ease" onclick="togglePitch('p2')">
+    <div class="pitch-badge" style="background:#071E2E;color:var(--blue);border:1px solid var(--blue)">📱 Ease Pitch</div>
+    <div class="pitch-title">เน้นความง่ายและทันสมัย</div>
+    <div class="pitch-when">ใช้กับ: เกษตรกรรุ่นใหม่ หรือคนที่เบื่อจดกระดาษ</div>
+    <div class="pitch-toggle" id="p2-toggle">▼ ดู Script เต็ม</div>
+    <div class="pitch-body" id="p2-body">
+      <p style="font-size:13px;line-height:1.8;color:#A8D5A2;font-style:italic">"เบื่อไหมครับที่ต้องมานั่งจดสมุดว่าวันไหนตัดปาล์มไปเท่าไหร่ ขายได้กี่บาท?</p>
+      <p style="font-size:13px;line-height:1.8;color:#A8D5A2;font-style:italic;margin-top:8px">ผมขอเสนอแอปตัวนี้ครับ Toiyibun Codex มันเหมือนมีเลขาส่วนตัวอยู่ในมือถือ น้าแค่สแกน QR Code ตอนเทปาล์ม ข้อมูลน้ำหนักกับราคาจะเด้งเข้ามือถือน้าทันที ไม่ต้องกลัวโดนโกง ไม่ต้องกลัวจดหาย</p>
+      <p style="font-size:13px;line-height:1.8;color:#A8D5A2;font-style:italic;margin-top:8px">ที่สำคัญ ข้อมูลตัวนี้แหละครับที่เป็น 'ใบเบิกทาง' ให้เราส่งปาล์มไปขายยุโรปได้ในอนาคต เพราะเขาตรวจย้อนกลับได้หมดว่าสวนเราดูแลดี ไม่ตัดป่า สวนน้าจะกลายเป็นสวนมาตรฐานสากลทันทีครับ"</p>
+    </div>
+  </div>
+
+  <div class="pitch-card pitch-visionary" onclick="togglePitch('p3')">
+    <div class="pitch-badge" style="background:#2D1500;color:var(--gold);border:1px solid var(--gold)">🔭 Visionary Pitch</div>
+    <div class="pitch-title">เน้นความยั่งยืนและการลงทุน</div>
+    <div class="pitch-when">ใช้กับ: ผู้นำเกษตรกร ประธานสหกรณ์ นักลงทุน</div>
+    <div class="pitch-toggle" id="p3-toggle">▼ ดู Script เต็ม</div>
+    <div class="pitch-body" id="p3-body">
+      <p style="font-size:13px;line-height:1.8;color:#A8D5A2;font-style:italic">"ท่านครับ ปัญหาปาล์มไทยตอนนี้คือเราสู้เขาไม่ได้เรื่องประสิทธิภาพ แต่สวน Toiyibun ของเราจะเปลี่ยนเกมครับ</p>
+      <p style="font-size:13px;line-height:1.8;color:#A8D5A2;font-style:italic;margin-top:8px">ด้วยระบบ dMRV และ Blockchain เราจะเปลี่ยนภาพลักษณ์จากสวนชาวบ้านธรรมดา ให้กลายเป็น 'เหมืองทองสีเขียว' ที่นักลงทุนระดับโลกสนใจ</p>
+      <p style="font-size:13px;line-height:1.8;color:#A8D5A2;font-style:italic;margin-top:8px">เราไม่ได้แค่ปลูกปาล์มขายลูกอย่างเดียวแล้วนะครับ แต่เรากำลัง 'ปลูกคาร์บอน' ขายควบคู่ไปด้วย ข้อมูลทุกอย่างโปร่งใส ตรวจสอบได้จากทั่วโลก นี่คือทางรอดเดียวที่จะทำให้ลูกหลานเราอยากกลับมาทำสวนต่อ เพราะมันคืองานที่มีเทคโนโลยีและมีอนาคตครับ"</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hdr"><span class="icon">📌</span><h3>KPIs ที่ต้องติดตาม</h3></div>
+    <div class="kpi-row">
+      <div class="kpi-box" style="border-color:var(--lime)">
+        <div class="kpi-val" style="color:var(--lime)" id="kpi1">0%</div>
+        <div class="kpi-label">App Adoption Rate</div>
+        <div class="kpi-target" style="color:var(--lime)">เป้า: > 80%</div>
+      </div>
+      <div class="kpi-box" style="border-color:var(--gold)">
+        <div class="kpi-val" style="color:var(--gold)" id="kpi2">0%</div>
+        <div class="kpi-label">OER Gap Reduction</div>
+        <div class="kpi-target" style="color:var(--gold)">เป้า: +1% ใน 6 เดือน</div>
+      </div>
+      <div class="kpi-box" style="border-color:var(--blue)">
+        <div class="kpi-val" style="color:var(--blue)" id="kpi3">100%</div>
+        <div class="kpi-label">Data Integrity</div>
+        <div class="kpi-target" style="color:var(--blue)">เป้า: 100%</div>
+      </div>
+    </div>
+    <button class="btn btn-lime" onclick="simulateKPI()">🎲 จำลอง KPI Progress</button>
+  </div>
+</div>
+
+<!-- ══ RISK ══ -->
+<div id="tab-risk" class="screen pb">
+  <div class="alert alert-warn"><span>⚠️</span><div>ความเสี่ยง 4 ด้านที่ต้องจัดการเพื่อให้ ROI อยู่ในเกณฑ์ 10 เดือน</div></div>
+
+  <div class="risk-item" style="border-color:var(--red)">
+    <div class="risk-title" style="color:var(--red)">⚠️ 1. พฤติกรรมเกษตรกร (Human Factor)</div>
+    <div class="risk-impact">ผลกระทบ: ตัดปาล์มดิบเพื่อรีบใช้เงิน → OER ไม่ถึง 20% → ROI ช้า</div>
+    <div class="risk-fix">✅ แก้ด้วย: ระบบ T-Points Incentive — จ่ายโบนัสสำหรับผู้ตัดสุกตามแจ้งเตือน + Smart Farmer Leader ทุก 10–20 สมาชิก</div>
+  </div>
+  <div class="risk-item" style="border-color:var(--gold)">
+    <div class="risk-title" style="color:var(--gold)">⚠️ 2. ความแม่นยำ Sensor (Technical)</div>
+    <div class="risk-impact">ผลกระทบ: Sensor เสีย/คลาดเคลื่อน → ใส่ปุ๋ยและน้ำผิดพลาด → OER ไม่เพิ่ม</div>
+    <div class="risk-fix">✅ แก้ด้วย: Hybrid Monitoring — ใช้ Satellite NDVI ตรวจสอบข้าม Sensor + Calibration ทุก 3 เดือน</div>
+  </div>
+  <div class="risk-item" style="border-color:var(--purple)">
+    <div class="risk-title" style="color:var(--purple)">⚠️ 3. ราคา Carbon ผันผวน</div>
+    <div class="risk-impact">ผลกระทบ: Carbon Credit ต่ำกว่าคาด → รายได้เสริมลดลง</div>
+    <div class="risk-fix">✅ แก้ด้วย: Premium Branding — ขาย T-VER + Verra VCS ราคา 500–1,500 ฿/ตัน แทนตลาดทั่วไป 120–350 ฿</div>
+  </div>
+  <div class="risk-item" style="border-color:var(--blue)">
+    <div class="risk-title" style="color:var(--blue)">⚠️ 4. สัญญาณอินเทอร์เน็ตในสวน</div>
+    <div class="risk-impact">ผลกระทบ: ส่งข้อมูล Blockchain ไม่ได้ → Data Integrity ต่ำ</div>
+    <div class="risk-fix">✅ แก้ด้วย: Edge Computing — แอปบันทึก Offline แล้ว Sync อัตโนมัติเมื่อมีสัญญาณ</div>
+  </div>
+
+  <div class="card">
+    <div class="card-hdr"><span class="icon">💡</span><h3>กลยุทธ์ Digital Community</h3></div>
+    <p style="font-size:13px;line-height:1.8;color:#A8D5A2">หัวใจสำคัญคือ <strong style="color:var(--lime)">"ความเชื่อมั่นของสมาชิก"</strong> — ตั้ง Smart Farmer Leader 1 คน ต่อสมาชิก 10–20 คน เพื่อพิสูจน์ให้เห็นว่า "แปลงที่ทำตามระบบ ได้เงินเข้ากระเป๋ามากกว่าจริงๆ" เมื่อเกษตรกรเห็นเพื่อนบ้านแลกส่วนลดปุ๋ยได้จริง เขาอยากเข้าร่วมระบบเองโดยที่เราไม่ต้องชักจูงหรือบังคับ</p>
+  </div>
+</div>
+
+<!-- ══ BLOCKCHAIN LOG ══ -->
+<div id="tab-blockchain" class="screen pb">
+  <div class="card">
+    <div class="card-hdr"><span class="icon">⛓</span><h3>Blockchain Transaction Log</h3><span class="tag tag-green">LIVE</span></div>
+    <div id="blockLog" style="max-height:400px;overflow-y:auto">
+      <!-- filled by JS -->
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><span class="icon">🔐</span><h3>กลไก Blockchain 3 ขั้น</h3></div>
+    <div class="earn-row">
+      <div class="earn-icon">1️⃣</div>
+      <div class="earn-info">
+        <div class="earn-title">Data Validation — หน้าลานเท</div>
+        <div class="earn-desc">ระบบตรวจค่าน้ำหนักและ OER เทียบกับที่บันทึกใน App</div>
+      </div>
+    </div>
+    <div class="earn-row">
+      <div class="earn-icon">2️⃣</div>
+      <div class="earn-info">
+        <div class="earn-title">On-Chain Record — Smart Contract</div>
+        <div class="earn-desc">ถ้าข้อมูลถูกต้อง สั่งจ่าย T-Points เข้า Wallet บน Blockchain ทันที</div>
+      </div>
+    </div>
+    <div class="earn-row">
+      <div class="earn-icon">3️⃣</div>
+      <div class="earn-info">
+        <div class="earn-title">Value Exchange — ที่สหกรณ์</div>
+        <div class="earn-desc">เกษตรกรโชว์หน้า App แลกส่วนลด ระบบตัดแต้มแบบ Real-time</div>
+      </div>
+    </div>
+    <button class="btn btn-outline" style="margin-top:10px" onclick="addBlockTx()">➕ จำลอง Transaction ใหม่</button>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <div class="bnav-item active" onclick="showTab('home')"><span class="bnav-icon">🏠</span>หลัก</div>
+  <div class="bnav-item" onclick="showTab('oer')"><span class="bnav-icon">📈</span>OER</div>
+  <div class="bnav-item" onclick="showTab('tpoints')"><span class="bnav-icon">🪙</span>T-Points</div>
+  <div class="bnav-item" onclick="showTab('ripe')"><span class="bnav-icon">🌴</span>ทะลาย</div>
+  <div class="bnav-item" onclick="showTab('roi')"><span class="bnav-icon">💰</span>ROI</div>
+</div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────────
+let state = {
+  pts: parseInt(localStorage.getItem('tc_pts')||'0'),
+  tokens: parseInt(localStorage.getItem('tc_tokens')||'0'),
+  oer: parseFloat(localStorage.getItem('tc_oer')||'16.0'),
+  ptLog: JSON.parse(localStorage.getItem('tc_ptlog')||'[]'),
+  blockLog: JSON.parse(localStorage.getItem('tc_blog')||'[]'),
+  lastFarm: JSON.parse(localStorage.getItem('tc_farm')||'null'),
+};
+function save(){ localStorage.setItem('tc_pts',state.pts); localStorage.setItem('tc_tokens',state.tokens); localStorage.setItem('tc_oer',state.oer); localStorage.setItem('tc_ptlog',JSON.stringify(state.ptLog)); localStorage.setItem('tc_blog',JSON.stringify(state.blockLog)); if(state.lastFarm) localStorage.setItem('tc_farm',JSON.stringify(state.lastFarm)); }
+
+// ── NAV ──────────────────────────────────────────────────────────
+const TABS=['home','oer','tpoints','ripe','roi','pitch','risk','blockchain'];
+function showTab(id){
+  TABS.forEach(t=>{
+    document.getElementById('tab-'+t).classList.toggle('active',t===id);
+    document.querySelectorAll('.tab-item')[TABS.indexOf(t)].classList.toggle('active',t===id);
+    document.querySelectorAll('.bnav-item').forEach((b,i)=>{ if(['home','oer','tpoints','ripe','roi'][i]===id) b.classList.add('active'); else b.classList.remove('active'); });
+  });
+  if(id==='tpoints') renderTPoints();
+  if(id==='roi') calcROI();
+  if(id==='blockchain') renderBlockLog();
+  if(id==='home') renderHome();
+}
+
+// ── CLOCK ──────────────────────────────────────────────────────────
+setInterval(()=>{ document.getElementById('clock').textContent=new Date().toLocaleTimeString('th-TH'); },1000);
+
+// ── SENSORS (SIMULATED) ─────────────────────────────────────────────
+const SENSORS=[
+  {id:'s1',label:'ความชื้นดิน',val:()=>(62+rnd(8)).toFixed(0),unit:'%',color:'var(--blue)'},
+  {id:'s2',label:'อุณหภูมิอากาศ',val:()=>(31+rnd(3)).toFixed(1),unit:'°C',color:'var(--gold)'},
+  {id:'s3',label:'NDVI (ดาวเทียม)',val:()=>(0.71+rnd(.08)).toFixed(2),unit:'Sentinel-2',color:'var(--lime)'},
+  {id:'s4',label:'CH₄ POME',val:()=>(2.3+rnd(.4)).toFixed(1),unit:'tCH₄/ha/yr',color:'var(--red)'},
+];
+function rnd(max){ return (Math.random()*max*2-max); }
+function renderSensors(){
+  const g=document.getElementById('sensorGrid');
+  if(!g) return;
+  g.innerHTML=SENSORS.map(s=>`<div class="sensor-item"><div class="sensor-val" style="color:${s.color}">${s.val()}</div><div class="sensor-unit">${s.unit}</div><div class="sensor-label">${s.label}</div></div>`).join('');
+}
+setInterval(renderSensors,4000);
+
+// ── HOME ─────────────────────────────────────────────────────────
+function renderHome(){
+  document.getElementById('h-oer').textContent = state.oer.toFixed(1)+'%';
+  document.getElementById('h-pts').textContent = state.pts.toLocaleString();
+  document.getElementById('h-tokens').textContent = state.tokens.toLocaleString();
+  if(state.lastFarm){
+    const f=state.lastFarm;
+    document.getElementById('lastFarm').innerHTML=`<span style="color:var(--lime)">${f.name}</span> | ${f.rai} ไร่ | OER ${f.oer}% | <span style="color:var(--gold)">${f.tokens} kgCO₂ Token</span>`;
+  }
+  renderSensors();
+}
+
+// ── OER CALC ─────────────────────────────────────────────────────
+function sv(id,val,suffix){ document.getElementById('sv-'+id).textContent=val+suffix; }
+function calcOER(){
+  const age=parseInt(document.querySelector('#tab-oer input[type=range]:nth-of-type(1)')?.value||12);
+  const water=parseInt(document.getElementById('o-water')?.value||0);
+  const fert=parseInt(document.getElementById('o-fert')?.value||0);
+  const harv=parseInt(document.getElementById('o-harvest')?.value||0);
+  const iot=parseInt(document.getElementById('o-iot')?.value||0);
+  const variety=parseInt(document.getElementById('o-variety')?.value||0);
+
+  // Base OER by variety
+  const bases=[16,18,20];
+  let oer=bases[variety];
+
+  // Age factor: peaks at 8–15, drops after
+  if(age<5) oer-=1.5;
+  else if(age>20) oer-=2.0+(age-20)*0.15;
+  else if(age>15) oer-=0.5;
+
+  // Additive factors
+  const waterBonus=[0,1.5,2.5,1.0];
+  const fertBonus=[0,1.0,2.0];
+  const harvBonus=[0,0.8,1.8];
+  const iotBonus=[0,0.7,1.2];
+  oer+=waterBonus[water]+fertBonus[fert]+harvBonus[harv]+iotBonus[iot];
+  oer=Math.min(25,Math.max(10,oer));
+
+  state.oer=oer;
+  // Update ring
+  const arc=document.getElementById('oerArc');
+  const pct=Math.min(100,(oer/25)*100);
+  if(arc) arc.style.strokeDashoffset=364*(1-pct/100);
+  const numEl=document.getElementById('oerPct');
+  if(numEl){ numEl.textContent=oer.toFixed(1)+'%'; numEl.style.color=oer>=20?'var(--lime)':oer>=18?'var(--gold)':'var(--red)'; }
+
+  // Breakdown bars
+  const factors=[
+    {label:'ฐาน OER พันธุ์',val:bases[variety],max:22,color:'var(--lime)'},
+    {label:'น้ำ +'+waterBonus[water]+'%',val:waterBonus[water],max:3,color:'var(--blue)'},
+    {label:'ปุ๋ย +'+fertBonus[fert]+'%',val:fertBonus[fert],max:2.5,color:'var(--gold)'},
+    {label:'เก็บเกี่ยว +'+harvBonus[harv]+'%',val:harvBonus[harv],max:2,color:'var(--purple)'},
+    {label:'IoT Sensor +'+iotBonus[iot]+'%',val:iotBonus[iot],max:1.5,color:'var(--blue)'},
+  ];
+  document.getElementById('oerBars').innerHTML=factors.map(f=>`<div style="margin-bottom:6px">
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:#6B9E7A;margin-bottom:2px"><span>${f.label}</span><span style="color:${f.color}">${f.val}%</span></div>
+    <div class="bar-track"><div class="bar-fill" style="width:${Math.max(0,f.val/f.max*100)}%;background:${f.color}"></div></div>
+  </div>`).join('');
+
+  const rai=parseFloat(document.getElementById('o-rai')?.value||20);
+  const ffb=rai*3;
+  const carbon=ffb*0.21*0.656*28*3.67;
+  document.getElementById('oerSummary').innerHTML=`
+    <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--g3)"><span style="color:#6B9E7A">OER คาดการณ์</span><strong style="color:${oer>=20?'var(--lime)':'var(--gold)'}">${oer.toFixed(1)}%</strong></div>
+    <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--g3)"><span style="color:#6B9E7A">รายได้เพิ่มต่อไร่/ปี</span><strong style="color:var(--gold)">${Math.max(0,(oer-16)*0.3*3000).toFixed(0)} ฿</strong></div>
+    <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--g3)"><span style="color:#6B9E7A">Carbon Token (POME)</span><strong style="color:var(--lime)">${carbon.toFixed(0)} kgCO₂eq/ปี</strong></div>
+    <div style="display:flex;justify-content:space-between;padding:4px 0"><span style="color:#6B9E7A">เป้า OER > 23%</span><strong style="color:${oer>=23?'var(--lime)':'var(--red)'}">${oer>=23?'✅ ทำได้!':'ต้องการ Full Sensor Package'}</strong></div>
+  `;
+}
+function saveOER(){
+  const name=document.getElementById('o-name')?.value||'ไม่ระบุชื่อ';
+  const rai=parseFloat(document.getElementById('o-rai')?.value||20);
+  const carbon=Math.floor(rai*3*0.21*0.656*28*3.67);
+  const pts=50;
+  state.tokens+=carbon;
+  state.ptLog.unshift({icon:'📈',bg:'var(--lime)',text:`OER ${state.oer.toFixed(1)}% — สวน ${name} ${rai} ไร่`,hash:genHash(),pts:pts});
+  earnPoints(pts,'บันทึก OER Analyzer');
+  state.lastFarm={name,rai,oer:state.oer.toFixed(1),tokens:carbon};
+  state.blockLog.unshift({type:'OER_RECORD',farm:name,oer:state.oer.toFixed(1),tokens:carbon,hash:genHash(),time:new Date().toLocaleString('th-TH')});
+  save();
+  renderHome();
+  alert(`✅ บันทึกสำเร็จ!\n\nOER: ${state.oer.toFixed(1)}%\nCarbon Token: ${carbon.toLocaleString()} kgCO₂eq\nT-Points: +${pts} แต้ม\n\nข้อมูลขึ้น Blockchain แล้ว!`);
+}
+
+// ── T-POINTS ─────────────────────────────────────────────────────
+const REWARDS=[
+  {icon:'🌱',name:'ส่วนลดปุ๋ย 5%',pts:200,desc:'แลกที่เคาน์เตอร์สหกรณ์'},
+  {icon:'🌿',name:'ส่วนลดปุ๋ย 10%',pts:400,desc:'Diamond tier only'},
+  {icon:'⚡',name:'คิวทอง Priority Lane',pts:300,desc:'เทปาล์มก่อนไม่ต้องรอคิว'},
+  {icon:'💎',name:'เงินปันผลคาร์บอน',pts:1000,desc:'แบ่งรายได้ Carbon Credit รายปี'},
+  {icon:'🎓',name:'สิทธิ์วิทยากรตัวคูณ',pts:2000,desc:'Diamond — สอนสมาชิกอื่น'},
+];
+function renderTPoints(){
+  document.getElementById('tp-num').textContent=state.pts.toLocaleString();
+  const tier=state.pts>=2000?'💎 Diamond Member':state.pts>=500?'🌳 Gold Member':'🌱 Silver Member';
+  document.getElementById('tp-tier').textContent=tier;
+  const next=state.pts>=2000?'Diamond Max!':state.pts>=500?`Diamond: ${(2000-state.pts).toLocaleString()} แต้ม`:(`Gold: ${(500-state.pts).toLocaleString()} แต้ม`);
+  document.getElementById('tp-next').textContent=next;
+  // Tier bar
+  for(let i=1;i<=5;i++){
+    const seg=document.getElementById('ts'+i);
+    const threshold=i*400;
+    seg.style.background=state.pts>=threshold?'var(--gold)':state.pts>=(threshold-400)?'var(--lime)':'var(--g3)';
+  }
+  document.getElementById('rewardList').innerHTML=REWARDS.map(r=>`
+    <div class="earn-row">
+      <div class="earn-icon">${r.icon}</div>
+      <div class="earn-info"><div class="earn-title">${r.name}</div><div class="earn-desc">${r.desc}</div></div>
+      <button class="btn btn-sm ${state.pts>=r.pts?'btn-gold':'btn-outline'}" style="font-size:11px;padding:6px 10px" onclick="redeemPts(${r.pts},'${r.name}')">${r.pts} แต้ม</button>
+    </div>`).join('');
+  renderPtLog();
+}
+function earnPoints(pts,reason){
+  state.pts+=pts;
+  state.ptLog.unshift({icon:'⭐',bg:'var(--gold)',text:reason,hash:genHash(),pts});
+  state.blockLog.unshift({type:'T_POINTS',action:reason,pts,hash:genHash(),time:new Date().toLocaleString('th-TH')});
+  save();
+  document.getElementById('h-pts').textContent=state.pts.toLocaleString();
+  if(document.getElementById('tp-num')) renderTPoints();
+}
+function redeemPts(cost,name){
+  if(state.pts<cost){ alert(`T-Points ไม่พอครับ — ต้องการ ${cost} แต้ม มีอยู่ ${state.pts} แต้ม`); return; }
+  if(!confirm(`แลก "${name}" ใช้ ${cost} แต้ม ยืนยันไหมครับ?`)) return;
+  state.pts-=cost;
+  state.ptLog.unshift({icon:'🎁',bg:'var(--purple)',text:`แลก: ${name}`,hash:genHash(),pts:-cost});
+  save(); renderTPoints();
+  alert(`✅ แลกสำเร็จ!\n"${name}"\nแสดงหน้าจอนี้ที่สหกรณ์เพื่อรับสิทธิ์ครับ`);
+}
+function renderPtLog(){
+  const el=document.getElementById('ptLog');
+  if(!el) return;
+  el.innerHTML=state.ptLog.length?state.ptLog.slice(0,10).map(l=>`<div class="log-item">
+    <div class="log-icon" style="background:${l.bg}22;border:1px solid ${l.bg}">${l.icon}</div>
+    <div><div style="color:#A8D5A2;font-size:12px">${l.text}</div><div class="log-hash">${l.hash}</div></div>
+    <div class="log-pts" style="color:${l.pts>0?'var(--gold)':'var(--red)'}">${l.pts>0?'+':''}${l.pts}</div>
+  </div>`).join(''):'<div style="color:#6B9E7A;text-align:center;padding:16px;font-size:13px">ยังไม่มีประวัติ</div>';
+}
+
+// ── RIPENESS ─────────────────────────────────────────────────────
+const RIPE={
+  unripe:{action:'❌ ห้ามตัดเด็ดขาด!',oer:'OER < 10%',color:'var(--red)',bg:'#2D0000',
+    tip:'รอให้มีผลร่วง 5 เมล็ดก่อน ถ้าตัดตอนนี้โรงสกัดหักราคา 20% และสูญเสีย 800–1,500 ฿/ตัน'},
+  under:{action:'⏳ รอ 3–5 วันก่อน',oer:'OER 12–15%',color:'var(--gold)',bg:'#2D1500',
+    tip:'น้ำมันยังไม่เต็ม อีก 3–5 วัน OER จะขึ้น 18%+ คุ้มค่ากว่าตัดตอนนี้มาก'},
+  ripe:{action:'✅ ตัดได้ทันที!',oer:'OER 18–23%',color:'var(--lime)',bg:'#0D3018',
+    tip:'เวลาที่ดีที่สุด! ตัดเลยแล้วส่งโรงสกัดภายใน 24 ชม. อย่าลืมเก็บผลร่วงด้วย (+T-Points!)'},
+  over:{action:'⚡ ตัดด่วนที่สุด!',oer:'FFA > 5% ราคาตก',color:'var(--purple)',bg:'#1A0033',
+    tip:'สุกเกินแล้ว! FFA เพิ่มทุกชั่วโมง ยิ่งช้ายิ่งสูญเสียรายได้ ตัดและส่งโรงสกัดทันที'},
+};
+function showRipe(type){
+  const d=RIPE[type];
+  document.getElementById('ripeResult').style.display='block';
+  document.getElementById('ripeCard').innerHTML=`
+    <div style="background:${d.bg};border-radius:12px;padding:14px;text-align:center;margin-bottom:10px;border:2px solid ${d.color}">
+      <div style="font-size:36px;font-weight:800;color:${d.color}">${d.action}</div>
+      <div style="font-size:14px;color:#A8D5A2;margin-top:4px">${d.oer}</div>
+    </div>
+    <div class="alert alert-tip"><span>💡</span><div>${d.tip}</div></div>
+  `;
+  document.getElementById('ripeResult').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+// ── ROI CALC ─────────────────────────────────────────────────────
+function calcROI(){
+  const rai=parseFloat(document.querySelector('#tab-roi input[type=range]:nth-of-type(1)')?.value||20);
+  const oerOld=parseFloat(document.querySelector('#tab-roi input[type=range]:nth-of-type(2)')?.value||16);
+  const oerNew=parseFloat(document.querySelector('#tab-roi input[type=range]:nth-of-type(3)')?.value||20);
+  const price=parseFloat(document.querySelector('#tab-roi input[type=range]:nth-of-type(4)')?.value||5);
+
+  const ffb=rai*3000;
+  const incPerKg=(oerNew-oerOld)*0.01*price*0.3;
+  const annualInc=ffb*incPerKg;
+  const carbonBonus=rai*250;
+  const total=annualInc+carbonBonus;
+  const invest=65000;
+  const payback=invest/total*12;
+
+  document.getElementById('roiResult').innerHTML=`
+    <div class="roi-box">
+      <div style="font-size:12px;color:#6B9E7A">คืนทุนใน</div>
+      <div class="roi-big">${payback.toFixed(1)} เดือน</div>
+      <div class="roi-label">ลงทุน 65,000 ฿ → กำไร ${total.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,",")} ฿/ปี</div>
+    </div>
+    <div class="compare-row">
+      <div class="compare-cell"><div class="compare-val" style="color:var(--red)">${oerOld}%</div><div class="compare-label">OER ปัจจุบัน</div><div style="font-size:12px;color:var(--red);margin-top:4px">${(ffb*(price-price*0.3*0.16)).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,",")} ฿/ปี</div></div>
+      <div style="display:flex;align-items:center;font-size:20px">→</div>
+      <div class="compare-cell"><div class="compare-val" style="color:var(--lime)">${oerNew}%</div><div class="compare-label">OER เป้าหมาย</div><div style="font-size:12px;color:var(--lime);margin-top:4px">${(ffb*(price-price*0.3*0.16)+annualInc).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,",")} ฿/ปี</div></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><span class="icon">💰</span><h3>รายละเอียด ROI</h3></div>
+      <div style="font-size:13px;line-height:2.2">
+        <div style="display:flex;justify-content:space-between"><span style="color:#6B9E7A">รายได้เพิ่มจาก OER</span><strong style="color:var(--lime)">${annualInc.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,",")} ฿/ปี</strong></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:#6B9E7A">Carbon Credit (POME)</span><strong style="color:var(--lime)">${carbonBonus.toLocaleString()} ฿/ปี</strong></div>
+        <div style="display:flex;justify-content:space-between;border-top:1px solid var(--g3);padding-top:6px"><span style="color:#6B9E7A">รวมรายได้ที่เพิ่ม</span><strong style="color:var(--gold);font-size:16px">${total.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,",")} ฿/ปี</strong></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:#6B9E7A">เงินลงทุนระบบปีแรก</span><strong style="color:var(--red)">65,000 ฿</strong></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:#6B9E7A">คืนทุน</span><strong style="color:var(--gold)">${payback.toFixed(1)} เดือน</strong></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><span class="icon">💸</span><h3>งบประมาณลงทุน 65,000 ฿</h3></div>
+      ${[['IoT & Sensors (Soil + Weather)','25,000'],['dMRV & Satellite access','5,000'],['Digital Lot Tracking + QR/RFID','15,000'],['App & Cloud Blockchain Fee ปีแรก','10,000'],['ติดตั้งและ Training ทีมงาน','10,000']].map(r=>`<div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid var(--g3)"><span style="color:#A8D5A2">${r[0]}</span><strong style="color:var(--gold)">${r[1]} ฿</strong></div>`).join('')}
+    </div>`;
+}
+
+// ── PITCH / KPI ───────────────────────────────────────────────────
+function togglePitch(id){
+  const body=document.getElementById(id+'-body');
+  const toggle=document.getElementById(id+'-toggle');
+  const open=body.classList.toggle('open');
+  toggle.textContent=open?'▲ ซ่อน Script':'▼ ดู Script เต็ม';
+}
+function simulateKPI(){
+  const v1=Math.floor(60+Math.random()*35);
+  const v2=(Math.random()*2).toFixed(1);
+  document.getElementById('kpi1').textContent=v1+'%';
+  document.getElementById('kpi2').textContent='+'+v2+'%';
+  document.getElementById('kpi1').style.color=v1>=80?'var(--lime)':'var(--gold)';
+  document.getElementById('kpi2').style.color=parseFloat(v2)>=1?'var(--lime)':'var(--gold)';
+}
+
+// ── BLOCKCHAIN LOG ────────────────────────────────────────────────
+function renderBlockLog(){
+  const el=document.getElementById('blockLog');
+  if(!el) return;
+  const all=[...state.blockLog,...[
+    {type:'INIT',action:'System Genesis Block',pts:0,hash:'0x000000000000',time:'ก่อตั้งระบบ'},
+  ]];
+  el.innerHTML=all.slice(0,20).map((b,i)=>`<div class="log-item">
+    <div class="log-icon" style="background:${b.type==='T_POINTS'?'#3D2000':'#0D3018'};border:1px solid ${b.type==='T_POINTS'?'var(--gold)':'var(--lime)'}">${b.type==='T_POINTS'?'🪙':b.type==='OER_RECORD'?'📈':'⛓'}</div>
+    <div>
+      <div style="color:#A8D5A2;font-size:12px">${b.action||b.type} ${b.farm?'— '+b.farm:''} ${b.pts?'(+'+b.pts+' pts)':''}</div>
+      <div class="log-hash">${b.hash}</div>
+      <div style="font-size:9px;color:#4A6B52">${b.time}</div>
+    </div>
+    ${b.oer?`<div class="tag tag-green" style="flex-shrink:0">OER ${b.oer}%</div>`:''}
+  </div>`).join('');
+}
+function addBlockTx(){
+  const types=['HARVEST_RECORD','QR_SCAN','T_POINTS_AWARD','CARBON_MINT'];
+  const t=types[Math.floor(Math.random()*types.length)];
+  state.blockLog.unshift({type:t,action:t.replace(/_/g,' '),pts:Math.floor(Math.random()*50)+10,hash:genHash(),time:new Date().toLocaleString('th-TH')});
+  save(); renderBlockLog();
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────
+function genHash(){ return '0x'+Array.from({length:12},()=>'0123456789abcdef'[Math.floor(Math.random()*16)]).join(''); }
+
+// ── INIT ──────────────────────────────────────────────────────────
+(function init(){
+  renderHome();
+  calcOER();
+  calcROI();
+  // seed some blockchain logs if empty
+  if(state.blockLog.length===0){
+    state.blockLog=[
+      {type:'SYSTEM_START',action:'Toiyibun Codex v2 Online',hash:genHash(),time:'2026-04-08 08:00:00'},
+      {type:'T_POINTS',action:'Welcome Bonus',pts:50,hash:genHash(),time:'2026-04-08 08:01:00'},
+    ];
+    state.pts+=50;
+    save();
+  }
+})();
+</script>
+</body>
+</html>
